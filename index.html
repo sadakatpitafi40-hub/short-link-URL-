@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Short Link Creator</title>
+  <style>
+    body { font-family: Arial; padding: 20px; }
+    .gallery img { width: 100px; margin: 5px; cursor: pointer; border: 2px solid transparent; }
+    .gallery img.selected { border-color: blue; }
+    #preview { margin-top: 10px; }
+  </style>
+</head>
+<body>
+  <h2>Create a Short Link</h2>
+
+  <div class="gallery">
+    <img src="img1.jpg" alt="Image 1" onclick="selectImage(this)">
+    <img src="img2.jpg" alt="Image 2" onclick="selectImage(this)">
+    <img src="img3.jpg" alt="Image 3" onclick="selectImage(this)">
+  </div>
+
+  <div id="preview"></div>
+
+  <form id="linkForm">
+    <input type="hidden" name="image" id="imageInput">
+    <label>Title: <input type="text" name="title" required></label><br><br>
+    <label>Description:<br><textarea name="description" required></textarea></label><br><br>
+    <label>Original URL: <input type="url" name="url" required></label><br><br>
+    <button type="submit">Generate Short Link</button>
+  </form>
+
+  <div id="result"></div>
+
+  <script>
+    function selectImage(img) {
+      document.querySelectorAll('.gallery img').forEach(i => i.classList.remove('selected'));
+      img.classList.add('selected');
+      document.getElementById('imageInput').value = img.src;
+      document.getElementById('preview').innerHTML = `<strong>Selected:</strong><br><img src="${img.src}" width="150">`;
+    }
+
+    document.getElementById('linkForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const formData = new FormData(this);
+      const res = await fetch('generate.php', {
+        method: 'POST',
+        body: formData
+      });
+      const data = await res.json();
+      document.getElementById('result').innerHTML = `
+        <p><strong>Short Link:</strong> <a href="${data.short}" target="_blank">${data.short}</a></p>
+        <p><strong>Final URL:</strong> ${data.original}</p>
+      `;
+    });
+  </script>
+</body>
+</html>
